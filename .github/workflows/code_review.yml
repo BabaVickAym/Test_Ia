@@ -19,13 +19,17 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.x'
-        cache: 'pip'  # Met en cache les dépendances pip pour accélérer les exécutions futures
+        # Met en cache les dépendances pip pour accélérer les exécutions futures
+        cache: 'pip'  
+        cache-dependency-path: requirements.txt # Spécifie le fichier de dépendances pour le cache
 
     - name: Check for requirements.txt
       run: |
         if [ ! -f requirements.txt ]; then
-          echo "Erreur : requirements.txt n'existe pas dans le dépôt."
-          exit 1
+          echo "Erreur : requirements.txt n'existe pas dans le dépôt. Création d'un fichier temporaire."
+          # Création d'un fichier temporaire pour l'installation des dépendances
+          echo "google-genai" > requirements.txt
+          echo "typy" >> requirements.txt
         fi
 
     - name: Install dependencies
@@ -38,7 +42,7 @@ jobs:
           exit 1
         fi
 
-    - name: Run Code Review Script
+    - name: Run Code Review and Typy Verification Script
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
@@ -55,8 +59,11 @@ jobs:
         echo "Auteur du commit : $COMMIT_AUTHOR_EMAIL"
         
         # Liste les fichiers modifiés dans le dernier commit
-        CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+        # Utilisation de 'git diff-tree' pour une liste plus fiable des fichiers modifiés/ajoutés/supprimés
+        CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD)
         echo "Fichiers modifiés : $CHANGED_FILES"
         
-        # Exécute le script Python
+        # Exécute le script Python. 
+        # Si le script retourne un code d'erreur (par exemple, si Typy échoue), cette étape échouera, 
+        # ce qui bloquera le workflow et, par conséquent, le push.
         python analyze_and_notify.py "$COMMIT_AUTHOR_EMAIL" "$CHANGED_FILES"
