@@ -179,6 +179,9 @@ send_email(RECIPIENT_EMAIL, email_subject, html_review)
 # C'est la méthode pour "bloquer le push" comme demandé.
 if not typy_success:
     print("Échec de la vérification Typy. Le script va se terminer avec un code d'erreur pour bloquer le push.")
+    print("\n--- Rapport Typy Complet ---\n")
+    print(typy_report)
+    print("\n----------------------------\n")
     # Le code de retour de Typy est déjà dans le rapport, mais nous allons utiliser 1 pour une erreur générique
     sys.exit(1)
 else:
