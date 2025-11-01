@@ -19,7 +19,7 @@ USERS_DB = {
     "user": {"password": "user456", "role": "user"}
 }
 
-def fake_api_login(username: str, password: str) -> dict:
+def fake_api_login( username: str, password: str) -> dict:
     """Simule une API de login"""
     if username in USERS_DB and USERS_DB[username]["password"] == password:
         return {"success": True, "token": "fake-jwt-token-123", "role": USERS_DB[username]["role"]}
